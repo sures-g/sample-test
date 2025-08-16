@@ -4,6 +4,8 @@ FROM eclipse-temurin:17-jdk-alpine
 # Add Maven & build the app
 COPY . /app
 WORKDIR /app
+CHMOD 777 ./mvnw
+
 RUN ./mvnw package -DskipTests
 
 # Use a smaller base image for runtime
