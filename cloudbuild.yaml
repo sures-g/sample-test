@@ -1,2 +1,5 @@
 steps:
-    logsBucket: gs://sample-test-bucket-08172025
+ -name: 'gcr.io/cloud-builders/gcloud'
+ args: ['install', '.']
+  
+logsBucket: 'gs://sample-test-bucket-08172025'
