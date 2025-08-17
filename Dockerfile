@@ -1,19 +1,25 @@
-# Use official Java image
-FROM eclipse-temurin:17-jdk-alpine
+      #DOCKER FILE
+# Use a base image with Java 17 and Maven 3.6.0
+FROM maven:3.8.3-openjdk-17 AS build
 
-# Add Maven & build the app
-COPY . /app
+# Set the working directory in the container
 WORKDIR /app
-RUN CHMOD 777 ./mvnw
 
-RUN ./mvnw package -DskipTests
+# Copy the pom.xml and source code to the container
+COPY pom.xml .
+COPY src ./src
 
-# Use a smaller base image for runtime
-FROM eclipse-temurin:17-jre-alpine
-COPY --from=0 /app/target/sample-test-0.0.1-SNAPSHOT.jar app.jar
+# Build the application with Maven
+RUN mvn clean install -DskipTests
 
-# Set the port (Cloud Run injects $PORT)
-ENV PORT=8080
-EXPOSE 8080
+# Use a lightweight Java 17 image for running the application
+FROM openjdk:17
 
-CMD ["java", "-jar", "app.jar"]
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the built JAR file from the build stage to the runtime image
+COPY --from=build /app/target/sample-test*.jar /sample-test.jar
+
+# Set the entry point for the container
+ENTRYPOINT ["java", "-jar", "sample-test.jar"]
