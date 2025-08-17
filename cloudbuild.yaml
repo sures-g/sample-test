@@ -1,6 +1,2 @@
 steps:
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['builds', 'submit', '--tag', 'gcr.io/$PROJECT_ID/my-app:latest', '.']
-options:
-  logsBucket: 'gs://sample-test-bucket-08172025'
-  logging: 'GCS_ONLY'
+    logsBucket: gs://sample-test-bucket-08172025
