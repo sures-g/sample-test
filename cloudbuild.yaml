@@ -3,4 +3,4 @@ steps:
     args: ['builds', 'submit', '--tag', 'gcr.io/$PROJECT_ID/my-app:latest', '.']
 options:
   logsBucket: 'gs://your-logs-bucket-name'
-  logging: 'GCS_ONLY'
+  logging: 'NONE'
