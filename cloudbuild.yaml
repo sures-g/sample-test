@@ -1,6 +1,34 @@
-steps:
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['builds', 'submit', '--tag', 'gcr.io/$PROJECT_ID/my-app:latest', '.']
-options:
- logsBucket: 'gs://sample-test-bucket-08172025'
- logging: 'GCS_ONLY'
+#Cloudbuild.yaml for Cloud Run 
+- steps:
+-   # Build the container image
+-   - name: 'gcr.io/cloud-builders/docker'
+-     args: ['build', '-t', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_VERSION}', '.']
+- 
+-   # Push the container image to Artifact Registry
+-   - name: 'gcr.io/cloud-builders/docker'
+-     args: ['push', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_VERSION}']
+- 
+-   # Deploy the Cloud Run service
+-   - name: 'gcr.io/cloud-builders/gcloud'
+-     args: ['run', 'deploy', '${_SERVICE_NAME}', '--image', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_VERSION}', '--platform', 'managed','--region', '${_REGION}','${_AUTH}','--service-account=${_SA_ACC}','${_PORT}','--${_MAX_INC}','--set-env-vars=SPRING_PROFILES_ACTIVE=prod','--cpu-boost']
+- 
+- images:
+-   - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_VERSION}'
+- 
+- substitutions:
+-   #GCP Specific configuration. Developers can edit these while deploying.
+-   _PROJECT_ID: for-tech-practice
+-   _REGION: us-central1
+-   _IMAGE_NAME: sampole-test-img
+-   _REPO_NAME: sample-test
+-   _SERVICE_NAME: my-java-app
+-   _VERSION: v1.0
+-   _AUTH: --allow-unauthenticated
+-   _SA_ACC: 183944825075-compute@developer.gserviceaccount.com
+-   _TRAFFIC: all-traffic
+-   _PORT: --port=8086
+-   _MEMORY: 4096Mi
+-   _MAX_INC: max-instances=10
+- 
+- options:
+-   logging: CLOUD_LOGGING_ONLY
