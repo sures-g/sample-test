@@ -19,7 +19,7 @@ FROM openjdk:17
 WORKDIR /app
 
 # Copy the built JAR file from the build stage to the runtime image
-COPY --from=build /app/target/sample-test .
+COPY --from=build /app/target/sample-test*.jar /sample-test.jar
 
 # Set the entry point for the container
-ENTRYPOINT ["java", "-jar", "sample-test"]
+ENTRYPOINT ["java", "-jar", "sample-test.jar"]
