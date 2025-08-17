@@ -2,5 +2,4 @@ steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['builds', 'submit', '--tag', 'gcr.io/$PROJECT_ID/my-app:latest', '.']
 options:
-  logsBucket: 'gs://your-logs-bucket-name'
   logging: 'NONE'
