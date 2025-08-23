@@ -2,3 +2,7 @@ steps:
 - name: gcr.io/cloud-builders/docker
   args: ['build', '-t', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image', '.']
 images: ['asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image']
+logsBucket: 'gs://cloud-build-log123'
+serviceAccount: 'projects/for-tech-practice/serviceAccounts/for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com'
+options:
+  logging: GCS_ONLY
