@@ -3,3 +3,7 @@ steps:
 - name: maven:3.3-jdk-8
   entrypoint: mvn
   args: ['clean', 'install']
+logsBucket: 'gs://cloud-build-log123'
+serviceAccount: 'projects/for-tech-practice/serviceAccounts/for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com'
+options:
+  logging: GCS_ONLY
