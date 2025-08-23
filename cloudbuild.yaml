@@ -1,6 +1,9 @@
 steps:
+- name: maven:3.9.6-eclipse-temurin-17 AS build
+  entrypoint: mvn
+  args: ['clean', 'install', '-Dmaven.test.skip=true']
 - name: gcr.io/cloud-builders/docker
-  args: ['build', '-t', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image', '.']
+  args: ['build', '-t', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image', '--build-arg=JAR_FILE=target/sample-test-0.0.2.jar', '.']
   # Push the image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image']
