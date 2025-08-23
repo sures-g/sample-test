@@ -1,6 +1,6 @@
 #Cloudbuild.yaml for Cloud Run 
 steps:
-- name: maven:3.8.6-openjdk-17
+- name: maven:3.9.6-eclipse-temurin-17
   entrypoint: mvn
   args: ['clean', 'install']
 logsBucket: 'gs://cloud-build-log123'
