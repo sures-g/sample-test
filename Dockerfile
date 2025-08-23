@@ -8,5 +8,5 @@ RUN mvn clean install -Dmaven.test.skip=true
 # Stage 2: Create the final image with JRE
 FROM eclipse-temurin:17-jre-focal
 WORKDIR /app
-COPY /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
