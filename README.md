@@ -52,3 +52,80 @@ The `cloudbuild.yaml` file automates three key steps:
 * **Images**: The `images` field explicitly lists the image that will be built and pushed.
 * **Logs**: The build logs are configured to be stored in a specified Google Cloud Storage bucket (`gs://cloud-build-log123`) using the `logging: GCS_ONLY` option.
 * **Service Account**: The build uses a dedicated service account (`for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com`) to ensure it has the necessary permissions for all steps.
+
+
+
+
+
+### ------------------------------------------------------------------------------------------------ ###
+### GCP setup steps for this project###
+
+Based on the `cloudbuild.yaml` file and the general requirements for a Cloud Build and Cloud Run project, here are the necessary Google Cloud Platform (GCP) setup steps.
+
+### 1. Enable Required APIs
+You must enable the APIs for the services used in the workflow. From the `cloudbuild.yaml` file, the project utilizes Cloud Build, Artifact Registry, and Cloud Run.
+You can enable these APIs using the `gcloud` command line tool or through the GCP Console:
+
+* **Cloud Build API**: `gcloud services enable cloudbuild.googleapis.com`
+* **Artifact Registry API**: `gcloud services enable artifactregistry.googleapis.com`
+* **Cloud Run API**: `gcloud services enable run.googleapis.com`
+
+---
+
+### 2. Set Up Artifact Registry
+The project uses Artifact Registry to store the Docker image. The `cloudbuild.yaml` specifies an Artifact Registry repository in the `asia-east1` region. You will need to create this repository.
+
+* Create a Docker repository in the `asia-east1` region with the name `sample-test`:
+    `gcloud artifacts repositories create sample-test --repository-format=docker --location=asia-east1`
+
+---
+
+### 3. Configure IAM Permissions
+The `cloudbuild.yaml` file specifies a custom service account for the build process: `for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com`. This service account needs specific IAM roles to successfully perform the build and deployment.
+
+* **Create the service account**: If this service account does not already exist, create it:
+    `gcloud iam service-accounts create for-cloud-build-deploy --project=for-tech-practice`
+
+* **Grant IAM roles**: Grant the necessary roles to the service account. These roles are essential for the service account to build, push, and deploy the application.
+    * **Artifact Registry Writer**: This role is required for pushing the Docker image to the Artifact Registry repository.
+        `gcloud artifacts repositories add-iam-policy-binding sample-test --location=asia-east1 --member="serviceAccount:for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com" --role="roles/artifactregistry.writer"`
+    * **Cloud Run Admin**: This role is needed to deploy and manage the Cloud Run service.
+        `gcloud projects add-iam-policy-binding for-tech-practice --member="serviceAccount:for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com" --role="roles/run.admin"`
+    * **Cloud Storage Object Admin**: The `cloudbuild.yaml` file specifies a log bucket (`gs://cloud-build-log123`). The service account needs permission to write logs to this bucket.
+        `gcloud storage buckets add-iam-policy-binding gs://cloud-build-log123 --member="serviceAccount:for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com" --role="roles/storage.objectAdmin"`
+
+
+### GCP CloudBuild trigger steps for this project###
+
+To set up a Cloud Build trigger for this project, you will need to connect a source code repository and configure the trigger to automatically start a build whenever a new change is pushed. This automates the process of building and deploying your application based on the `cloudbuild.yaml` file.
+
+Here are the steps to set up a Cloud Build trigger, assuming your code is in a supported repository like GitHub, Bitbucket, or Cloud Source Repositories. 
+
+### 1. Connect Your Repository
+First, you need to connect your source code repository to Google Cloud Build.
+
+* In the Google Cloud Console, navigate to **Cloud Build > Triggers**.
+* Click **"Connect repository"**.
+* Select your source provider (e.g., GitHub, Bitbucket, or Cloud Source Repositories) and follow the prompts to authorize Google Cloud.
+* Choose the repository that contains your project files (`cloudbuild.yaml`, `Dockerfile`, `pom.xml`).
+
+---
+
+### 2. Create the Trigger
+After connecting your repository, create the build trigger.
+
+* Go back to the **Triggers** page and click **"Create trigger"**.
+* Give your trigger a descriptive name, such as `java-app-ci-cd`.
+* Under **"Event"**, choose the type of event that will start the build. For continuous deployment, you would typically select **"Push to a branch"**.
+* Under **"Source"**, select the repository you just connected and the specific branch you want to monitor (e.g., `main` or `master`).
+* In the **"Configuration"** section, choose the build configuration type. Select **"Cloud Build configuration file (yaml or json)"**.
+* Specify the location of your build file. Since it's in the project's root directory, the default path `cloudbuild.yaml` should be correct.
+
+---
+
+### 3. Save the Trigger
+Finally, save your configuration to activate the trigger.
+
+* Click **"Create"**.
+
+Once the trigger is created, any new push to the specified branch of your repository will automatically initiate a Cloud Build that follows the steps in your `cloudbuild.yaml` file—building the Docker image, pushing it to Artifact Registry, and deploying it to Cloud Run.
