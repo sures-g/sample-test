@@ -1,15 +1,36 @@
 steps:
+# Step 1: Build the Docker image
+# This step uses the 'docker' Cloud Builder to create a container image.
+# The '-t' flag tags the image with a name that includes the Artifact Registry path.
+# The '.' at the end specifies that the Dockerfile is in the current directory.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image', '.']
-  # Push the image to Artifact Registry
+
+# Step 2: Push the Docker image to Artifact Registry
+# This step pushes the tagged image from the previous step to the specified Artifact Registry repository.
+# This makes the image available for deployment.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image']
-  # Deploy image to Cloud Run
+
+# Step 3: Deploy the image to Cloud Run
+# This step uses the 'gcloud' command-line tool to deploy the container image
+# as a new Cloud Run service named 'sample-test'.
+# '--image' specifies the image to deploy, and '--region' sets the deployment location.
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args: ['run', 'deploy', 'sample-test', '--image', 'asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image', '--region', 'asia-east1']
+
+# This section lists all container images that will be created and pushed by this build.
 images: ['asia-east1-docker.pkg.dev/for-tech-practice/sample-test/sampletest-image']
+
+# Specifies the Google Cloud Storage bucket where build logs will be stored.
 logsBucket: 'gs://cloud-build-log123'
+
+# The service account used by Cloud Build to perform actions like pushing images
+# and deploying to Cloud Run. This account needs appropriate IAM permissions.
 serviceAccount: 'projects/for-tech-practice/serviceAccounts/for-cloud-build-deploy@for-tech-practice.iam.gserviceaccount.com'
+
+# Build options. 'logging: GCS_ONLY' ensures that logs are only saved to the
+# specified GCS bucket and not to the default Cloud Build viewer.
 options:
   logging: GCS_ONLY
